@@ -1,37 +1,41 @@
+import * as AWS from 'aws-sdk'
 import 'source-map-support/register'
+import {createLogger} from '../../utils/logger'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+const Logging = createLogger('generateUploadUrl.ts_logs')
 
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import * as middy from 'middy'
-import { cors, httpErrorHandler } from 'middy/middlewares'
-import { createAttachmentPresignedUrl } from '../../helpers/todos'
 
-export const handler = middy(
-  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const todoId = event.pathParameters.todoId
-    // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const todoId = event.pathParameters.todoId
 
-    let url; 
- 
-    try {
-      url = await createAttachmentPresignedUrl(todoId)
-    } catch(e) {
-      return {
-        statusCode: 404,
-        headers: {
-          'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify({
-          error: e.message,
-          uploadUrl: url
-        })
-      }
-    }
-  }
-)
-handler
-  .use(httpErrorHandler())
-  .use(
-    cors({
-      credentials: true
+  const uploadUrl = await uploadURL(todoId)
+
+  Logging.info('Upload URL generated',uploadUrl,todoId)
+
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PATCH',
+      'Access-Control-Allow-Headers': 'Accept'
+    },
+    body: JSON.stringify({
+      uploadUrl
     })
-  )
+}
+}
+
+const s3 = new AWS.S3({
+  signatureVersion: 'v4' //
+})
+
+async function uploadURL(UploadURL:string){
+  Logging.info('Inside upload URL', UploadURL)
+      return s3.getSignedUrl('putObject', { 
+      Bucket: process.env.ATTACHMENT_S3_BUCKET, 
+      Key: UploadURL, 
+      Expires: 300 
+    })
+
+}

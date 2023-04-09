@@ -3,9 +3,9 @@ app: udagram-test-aws-node
 service: udagram-test-aws-node
 
 plugins:
+  - serverless-plugin-tracing
   - serverless-webpack
   - serverless-iam-roles-per-function
-  - serverless-plugin-tracing
 
 provider:
   name: aws
@@ -58,6 +58,7 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+          
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -121,6 +122,7 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
+          - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
@@ -190,7 +192,7 @@ resources:
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
         ResponseType: DEFAULT_4XX
         RestApiId:

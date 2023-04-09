@@ -1,0 +1,19 @@
+
+> es5-ext@0.10.62 postinstall C:\Users\karao\Documents\GitHub\c4-final-project-starter-code\backend\node_modules\es5-ext
+>  node -e "try{require('./_postinstall')}catch(e){}" || exit 0
+
+
+> serverless@3.29.0 postinstall C:\Users\karao\Documents\GitHub\c4-final-project-starter-code\backend\node_modules\serverless
+> node ./scripts/postinstall.js
+
+Serverless Framework successfully installed!
+
+To start your first project run “serverless”.
++ serverless@3.29.0
+added 331 packages from 168 contributors and audited 905 packages in 81.496s
+
+75 packages are looking for funding
+  run `npm fund` for details
+
+found 14 vulnerabilities (7 moderate, 6 high, 1 critical)
+  run `npm audit fix` to fix them, or `npm audit` for details
