@@ -30,11 +30,11 @@ const s3 = new AWS.S3({
   signatureVersion: 'v4' //
 })
 
-async function uploadURL(UploadURL:string){
-  Logging.info('Inside upload URL', UploadURL)
+async function uploadURL(todoId:string){
+  Logging.info('Inside upload URL', todoId)
       return s3.getSignedUrl('putObject', { 
       Bucket: process.env.ATTACHMENT_S3_BUCKET, 
-      Key: UploadURL, 
+      Key: todoId, 
       Expires: 300 
     })
 
