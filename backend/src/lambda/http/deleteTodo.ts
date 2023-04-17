@@ -20,7 +20,10 @@ export const handler = middy(
       return { 
         statusCode: 404,
         headers: {
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'OPTIONS,POST,PUT,GET,DELETE,PATCH',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Headers': 'Accept'
         },
         body: JSON.stringify({
           error: e.message

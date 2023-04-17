@@ -1,6 +1,7 @@
 {
   "name": "typescript-app",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "axios": "^0.21.1",
