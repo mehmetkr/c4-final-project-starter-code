@@ -123,19 +123,19 @@ functions:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
           - dynamodb:PutItem
-          - s3:PutObject
-          - s3:GetObject
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
           - xray:PutTelemetryRecords
-          - s3:PutObject
-          - s3:GetObject
         Resource:
           - '*'          
-
-
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - '*'
+        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
