@@ -1,5 +1,5 @@
-import { TodosAccess } from './todosAcess'
-import { AttachmentUtils } from './attachmentUtils';
+import { TodosAccess } from '../dataLayer/todosAcess'
+import { AttachmentUtils } from '../helpers/attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
@@ -37,7 +37,7 @@ export const getTodosForUser = async (userId: string) => {
   
     const todoId = uuid.v4()
     const createdAt = new Date().toISOString()
-    const attachmentUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`
+    // const attachmentUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`
   
     logger.info('Constructing the todo Item')
     const todo: TodoItem = {
@@ -47,7 +47,7 @@ export const getTodosForUser = async (userId: string) => {
       name: newTodo.name,
       dueDate: newTodo.dueDate,
       done: false,
-      attachmentUrl
+      // attachmentUrl
     }
     await TodosAccess.createTodo(todo)
     logger.info('Created todo', { todo })

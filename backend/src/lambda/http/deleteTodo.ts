@@ -3,7 +3,7 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
-import { deleteTodo } from '../../helpers/todos'
+import { deleteTodo } from '../../businessLogic/todos'
 import { getUserId } from '../utils'
 
 
@@ -21,6 +21,7 @@ export const handler = middy(
         statusCode: 404,
         headers: {
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
           'Access-Control-Allow-Methods': 'OPTIONS,POST,PUT,GET,DELETE,PATCH',
           'Content-Type': 'application/json',
           'Access-Control-Allow-Headers': 'Accept'
