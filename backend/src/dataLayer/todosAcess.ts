@@ -49,7 +49,7 @@ export const TodosAccess = {
       todoUpdate: TodoUpdate
     ): Promise<TodoItem> {
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
-      AWSXRay.captureAWSClient((doc as any).service)
+      // AWSXRay.captureAWSClient((doc as any).service)
       const result = await doc
         .update({
           TableName: process.env.TODOS_TABLE,

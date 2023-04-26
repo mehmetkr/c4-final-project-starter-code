@@ -34,7 +34,8 @@ async function uploadURL(todoId:string){
   Logging.info('Inside upload URL', todoId)
       return s3.getSignedUrl('putObject', { 
       Bucket: process.env.ATTACHMENT_S3_BUCKET, 
-      Key: todoId, 
+      Key: todoId,
+      ContentType: 'image/*',
       Expires: 300 
     })
 
