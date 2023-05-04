@@ -9,6 +9,10 @@ import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
 
+// declare var globalThis: {
+//   alert(message: string): void;
+//};
+
 export const getTodosForUser = async (userId: string) => {
     const logger = createLogger('GetTodos')
     try {
@@ -51,6 +55,11 @@ export const getTodosForUser = async (userId: string) => {
     }
     await TodosAccess.createTodo(todo)
     logger.info('Created todo', { todo })
+
+    logger.info('Sample message')
+
+    logger.info(todo.name)
+
     return todo as TodoItem
   }
   
