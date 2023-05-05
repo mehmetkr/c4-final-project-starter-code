@@ -29,4 +29,8 @@ This application will allow creating/saving/removing/updating/fetching Function 
    
 # Instructions for use
 
-Enter a mathematical function expression next to "Enter a new function in terms of x" and click on the button to save and upload a graph of the function.
+Next to "Enter a new function in terms of x", enter a mathematical function expression, followed by a comma, followed by the starting value of x, followed by a comma and finally the ending value of x expression next to and click on the button to save and upload a graph of the function. Here are a few correct examples:
+
+    x + 5, -2, 5
+    x * x - 4, -10, 10
+    3*x*x*x - 2*x*x + x - 2, 0, 20
