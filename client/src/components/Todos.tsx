@@ -1,10 +1,7 @@
-import { Chart, ChartConfiguration, LineController, LineElement, PointElement, LinearScale, Title } from 'chart.js';
 import * as React from 'react'
 import dateFormat from 'dateformat'
-import { Line } from 'react-chartjs-2';
 import { History } from 'history'
 import update from 'immutability-helper'
-import html2canvas from 'html2canvas';
 import {
   Button,
   Checkbox,
@@ -52,13 +49,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
-      const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
-        dueDate
-      })
+      const functionInput = this.state.newTodoName
 
-
-      const [expression, rangeStart, rangeEnd] = newTodo.name.split(',');
+      const [expression, rangeStart, rangeEnd] = functionInput.split(',');
 
       // Parse numerical values
       const start = parseFloat(rangeStart.trim());
@@ -70,35 +63,51 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const interval = (end - start) / 100;
 
       for (let x = start; x <= end; x += interval) {
-        const y = eval(expression.replace(/x/g, String(x)));
+        const y = eval(expression);
         xValues.push(x);
-        yValues.push(y);
+        yValues.push(-y);
       }
 
-    // Draw the graph
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+      // Draw the graph
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
 
-    if (!context) {
-      throw new Error('Canvas context is not available.');
-    }
+      if (!context) {
+        throw new Error('Canvas context is not available.');
+      }
 
-    this.drawGraph(context, xValues, yValues);
+      canvas.width = 1500;
+      canvas.height = 1000;
 
-    // Save the graph as a JPG file
-    this.saveGraphAsJpg(canvas);
+      this.drawGraph(context, xValues, yValues);
 
+      const idToken = this.props.auth.getIdToken()
 
+      // Save the graph as a JPG file
+      this.saveGraphAsJpg(canvas, idToken);
 
+      const dataUrl = canvas.toDataURL('image/jpeg');
+
+      // Generate base64 string of the graph image
+      const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+    
+      // Convert base64 string to buffer
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      
+      const newTodo = await createTodo(idToken, {
+        name: this.state.newTodoName,
+        dueDate,
+        graphBuffer: buffer
+      })
     
       this.setState({
         todos: [...this.state.todos, newTodo],
         newTodoName: ''
       })
-      
 
-    } catch {
-      alert('Todo creation failed')
+    } catch (e) {
+      alert(`Failed to create the function: ${(e as Error).message}`)
     }
   }
 
@@ -109,19 +118,92 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     xValues: number[],
     yValues: number[]
   ) => {
-    // Clear the canvas
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-  
-    // Set up the coordinate system
-    const minX = Math.min(...xValues);
-    const maxX = Math.max(...xValues);
-    const minY = Math.min(...yValues);
-    const maxY = Math.max(...yValues);
+
     const canvasWidth = context.canvas.width;
     const canvasHeight = context.canvas.height;
-    const padding = 10;
-    const scaleX = (canvasWidth - padding * 2) / (maxX - minX);
-    const scaleY = (canvasHeight - padding * 2) / (maxY - minY);
+
+    // Clear the canvas
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Set up graph dimensions
+  const graphWidth = canvasWidth - 80; // Adjust as needed
+  const graphHeight = canvasHeight - 80; // Adjust as needed
+
+  // Find the minimum and maximum values for x and y
+  const minX = Math.min(0, ...xValues);
+  const maxX = Math.max(0, ...xValues);
+  const minY = Math.min(0, ...yValues);
+  const maxY = Math.max(0, ...yValues);
+
+  // Calculate the origin point
+  // const originX = Math.abs(minX) * (graphWidth / (maxX - minX)) + 40;
+  // const originY = canvasHeight - Math.abs(minY) * (graphHeight / (maxY - minY)) - 40;
+
+  const padding = 2;
+  const scaleX = (canvasWidth - padding * 2) / (maxX - minX);
+  const scaleY = (canvasHeight - padding * 2) / (maxY - minY);
+
+  const originX = this.scaleX(0, minX, scaleX, padding);
+  const originY = this.scaleY(0, minY, scaleY, padding);
+
+  // Draw x-axis
+  context.beginPath();
+  context.moveTo(0, originY);
+  context.lineTo(canvasWidth, originY);
+  context.strokeStyle = '#FFFFFF'; // White color
+  context.stroke();
+
+  // Draw y-axis
+  context.beginPath();
+  context.moveTo(originX, 0);
+  context.lineTo(originX, canvasHeight);
+  context.strokeStyle = '#FFFFFF'; // White color
+  context.stroke();
+
+  // Draw x-axis tick marks
+  const xTickInterval = graphWidth / 10; // Adjust as needed
+  const xTickLength = 8; // Adjust as needed
+  const xTickStartY = originY + xTickLength / 2; // Adjust as needed
+  const xTickEndY = originY - xTickLength / 2; // Adjust as needed
+
+  const xTickShift = originX - Math.floor(originX / xTickInterval) * xTickInterval
+
+  for (let i = 0; i <= 10; i++) {
+    const xTickX = i * xTickInterval + xTickShift;
+    const xTickValue = minX + (i * (maxX - minX)) / 10;
+
+    context.beginPath();
+    context.moveTo(xTickX, xTickStartY);
+    context.lineTo(xTickX, xTickEndY);
+    context.strokeStyle = '#FFFFFF'; // White color
+    context.stroke();
+
+    // Draw tick label
+    context.fillStyle = '#FFFFFF'; // White color
+    context.textAlign = 'center';
+    context.fillText(xTickValue.toFixed(1), xTickX, originY + 20); // Adjust label position as needed
+  }
+
+  // Draw y-axis tick marks
+  const yTickInterval = graphHeight / 10; // Adjust as needed
+  const yTickLength = 8; // Adjust as needed
+  const yTickStartX = originX - yTickLength / 2; // Adjust as needed
+  const yTickEndX = originX + yTickLength / 2; // Adjust as needed
+
+  for (let i = 0; i <= 10; i++) {
+    const yTickY = i * yTickInterval;
+    const yTickValue = - minY - (i * (maxY - minY)) / 10;
+
+    context.beginPath();
+    context.moveTo(yTickStartX, yTickY);
+    context.lineTo(yTickEndX, yTickY);
+    context.strokeStyle = '#FFFFFF'; // White color
+    context.stroke();
+
+    context.fillStyle = '#FFFFFF'; // White color
+    context.textAlign = 'center';
+    context.fillText(yTickValue.toFixed(1), originX + 20, yTickY); // Adjust label position as needed
+  }
   
     // Draw the graph
     context.beginPath();
@@ -148,13 +230,13 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   
 
 
-  saveGraphAsJpg = (canvas: HTMLCanvasElement) => {
+  saveGraphAsJpg = (canvas: HTMLCanvasElement, id: String) => {
     const dataUrl = canvas.toDataURL('image/jpeg');
   
     // Create a temporary link element
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'graph.jpg';
+    link.download = id.toString();
   
     // Simulate a click on the link to trigger the download
     link.dispatchEvent(
@@ -204,7 +286,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         loadingTodos: false
       })
     } catch (e) {
-      alert(`Failed to fetch todos: ${(e as Error).message}`)
+      alert(`Failed to fetch functions: ${(e as Error).message}`)
     }
   }
 
@@ -257,7 +339,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Functions
         </Loader>
       </Grid.Row>
     )
