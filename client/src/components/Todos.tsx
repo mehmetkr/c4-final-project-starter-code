@@ -236,7 +236,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     // Create a temporary link element
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = id.toString();
+    link.download = id.toString().substring(0, 8) + ".jpg";
   
     // Simulate a click on the link to trigger the download
     link.dispatchEvent(
