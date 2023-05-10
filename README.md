@@ -27,3 +27,6 @@ This application will allow creating/saving/removing/updating/fetching Function 
    sls config credentials --provider aws --key YOUR_ACCESS_KEY_ID --secret YOUR_SECRET_KEY --profile serverless
    ```
    
+# Instructions for use
+
+Enter a mathematical function expression next to "Enter a new function in terms of x" and click on the button to save and upload a graph of the function.
