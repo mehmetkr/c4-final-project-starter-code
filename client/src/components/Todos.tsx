@@ -311,7 +311,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'Enter a new function in terms of x and the range of x',
+              content: 'Enter a new function in terms of x',
               onClick: this.onTodoCreate
             }}
             fluid
