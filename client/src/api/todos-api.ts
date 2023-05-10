@@ -21,16 +21,6 @@ export async function createTodo(
   idToken: string,
   newTodo: CreateTodoRequest
 ): Promise<Todo> {
-
-  const firstResponse = await Axios.post(`${apiEndpoint}/todos/${idToken}/attachment`, '', {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`
-    }
-  })
-
-  await Axios.put(firstResponse.data.uploadUrl, newTodo.graphBuffer)
-
   const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newTodo), {
     headers: {
       'Content-Type': 'application/json',
