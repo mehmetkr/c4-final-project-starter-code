@@ -41,7 +41,7 @@ functions:
   # TODO: Configure this function - 
   # Provide iamRoleStatements property for performing Actions on DynamoDB
   GetTodos:
-    handler: src/lambda/http/getFunctions.handler
+    handler: src/lambda/http/getTodos.handler
     events:
       - http:
           method: get
@@ -71,7 +71,7 @@ functions:
   # To refer to an AWS resource defined in the "Resources" section, you can use "Resource: !GetAtt <resource-name>.Arn"
   # To validate incoming HTTP requests, we have provided the request schemas in function definition below. 
   CreateTodo:
-    handler: src/lambda/http/createFunctions.handler
+    handler: src/lambda/http/createTodo.handler
     events:
       - http:
           method: post
@@ -96,7 +96,7 @@ functions:
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
   UpdateTodo:
-    handler: src/lambda/http/updateFunctions.handler
+    handler: src/lambda/http/updateTodo.handler
     events:
       - http:
           method: patch
@@ -129,7 +129,7 @@ functions:
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
   DeleteTodo:
-    handler: src/lambda/http/deleteFunctions.handler
+    handler: src/lambda/http/deleteTodo.handler
     events:
       - http:
           method: delete

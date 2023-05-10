@@ -4,7 +4,7 @@ This is a simple Function Plotter and Storer application using AWS Lambda and Se
 
 # Functionality of the application
 
-This application will allow creating/saving/removing/updating/fetching Function items. Each Function item can optionally have an attachment image. Each user only has access to Function items that he/she has created.
+This application will allow creating/saving/removing/updating/fetching Function items. Each TODO item can optionally have an attachment image. Each user only has access to Function items that he/she has created.
 
 ## Prerequisites
 
