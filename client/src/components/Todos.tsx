@@ -1,10 +1,7 @@
-import { Chart, ChartConfiguration, LineController, LineElement, PointElement, LinearScale, Title } from 'chart.js';
-import * as React from 'react'
 import dateFormat from 'dateformat'
-import { Line } from 'react-chartjs-2';
 import { History } from 'history'
 import update from 'immutability-helper'
-import html2canvas from 'html2canvas';
+import * as React from 'react'
 import {
   Button,
   Checkbox,
@@ -47,8 +44,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     this.props.history.push(`/todos/${todoId}/edit`)
   }
 
-
-
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
@@ -56,116 +51,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         name: this.state.newTodoName,
         dueDate
       })
-
-
-      const [expression, rangeStart, rangeEnd] = newTodo.name.split(',');
-
-      // Parse numerical values
-      const start = parseFloat(rangeStart.trim());
-      const end = parseFloat(rangeEnd.trim());
-
-      // Calculate x and y values
-      const xValues = [];
-      const yValues = [];
-      const interval = (end - start) / 100;
-
-      for (let x = start; x <= end; x += interval) {
-        const y = eval(expression.replace(/x/g, String(x)));
-        xValues.push(x);
-        yValues.push(y);
-      }
-
-    // Draw the graph
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      throw new Error('Canvas context is not available.');
-    }
-
-    this.drawGraph(context, xValues, yValues);
-
-    // Save the graph as a JPG file
-    this.saveGraphAsJpg(canvas);
-
-
-
-    
       this.setState({
         todos: [...this.state.todos, newTodo],
         newTodoName: ''
       })
-      
-
     } catch {
       alert('Todo creation failed')
     }
   }
-
-
-  
-  drawGraph = (
-    context: CanvasRenderingContext2D,
-    xValues: number[],
-    yValues: number[]
-  ) => {
-    // Clear the canvas
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-  
-    // Set up the coordinate system
-    const minX = Math.min(...xValues);
-    const maxX = Math.max(...xValues);
-    const minY = Math.min(...yValues);
-    const maxY = Math.max(...yValues);
-    const canvasWidth = context.canvas.width;
-    const canvasHeight = context.canvas.height;
-    const padding = 10;
-    const scaleX = (canvasWidth - padding * 2) / (maxX - minX);
-    const scaleY = (canvasHeight - padding * 2) / (maxY - minY);
-  
-    // Draw the graph
-    context.beginPath();
-    context.moveTo(this.scaleX(xValues[0], minX, scaleX, padding), this.scaleY(yValues[0], minY, scaleY, padding));
-  
-    for (let i = 1; i < xValues.length; i++) {
-      const x = this.scaleX(xValues[i], minX, scaleX, padding);
-      const y = this.scaleY(yValues[i], minY, scaleY, padding);
-      context.lineTo(x, y);
-    }
-  
-    context.strokeStyle = 'blue';
-    context.lineWidth = 2;
-    context.stroke();
-  };
-  
-  scaleX = (value: number, minX: number, scaleX: number, padding: number) => {
-    return (value - minX) * scaleX + padding;
-  };
-  
-  scaleY = (value: number, minY: number, scaleY: number, padding: number) => {
-    return (value - minY) * scaleY + padding;
-  };
-  
-
-
-  saveGraphAsJpg = (canvas: HTMLCanvasElement) => {
-    const dataUrl = canvas.toDataURL('image/jpeg');
-  
-    // Create a temporary link element
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = 'graph.jpg';
-  
-    // Simulate a click on the link to trigger the download
-    link.dispatchEvent(
-      new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window
-      })
-    );
-  };
-
 
   onTodoDelete = async (todoId: string) => {
     try {
@@ -211,7 +104,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">Functions</Header>
+        <Header as="h1">TODOs</Header>
 
         {this.renderCreateTodoInput()}
 
@@ -229,7 +122,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New function',
+              content: 'New task',
               onClick: this.onTodoCreate
             }}
             fluid

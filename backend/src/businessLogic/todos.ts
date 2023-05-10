@@ -9,10 +9,6 @@ import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
 
-// declare var globalThis: {
-//   alert(message: string): void;
-//};
-
 export const getTodosForUser = async (userId: string) => {
     const logger = createLogger('GetTodos')
     try {
