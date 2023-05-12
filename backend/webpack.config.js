@@ -1,11 +1,10 @@
 const path = require('path');
 const slsw = require('serverless-webpack');
-// var nodeExternals = require('webpack-node-externals')
+const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin');
 
 module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: slsw.lib.entries,
-  // externals: [nodeExternals()],
   devtool: 'source-map',
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
@@ -16,10 +15,33 @@ module.exports = {
     filename: '[name].js',
   },
   target: 'node',
+  node: {
+    __dirname: false,
+  },
   module: {
     rules: [
       // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
       { test: /\.tsx?$/, loader: 'ts-loader' },
+      {
+        test: /\.node$/,
+        loader: 'node-loader',
+      },
+      {
+        test: /\.(gif|svg|jpg|png)$/,
+        use: 'file-loader',
+      },
+      {
+        test: /chart\.js$/,
+        use: 'script-loader',
+      },
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto'
+      }
     ],
   },
+  plugins: [
+    new ModuleConcatenationPlugin(),
+  ],
 };

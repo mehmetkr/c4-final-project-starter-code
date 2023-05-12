@@ -4,10 +4,23 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
+import QuickChart from 'quickchart-js';
+import fetch from 'node-fetch';
+
+
+// import { v4 as uuid } from 'uuid';
+
+// import * as fs from 'fs';
 
 // const XAWS = AWSXRay.captureAWS(AWS)
 
 const logger = createLogger('TodosAccess')
+
+
+const s3 = new AWS.S3({
+  signatureVersion: 'v4'
+});
+
 
 // TODO: Implement the dataLayer logic
 
@@ -32,6 +45,23 @@ export const TodosAccess = {
     },
   
     async createTodo(todo: TodoItem): Promise<TodoItem> {
+
+      // Splitting todo name into three sections
+      const nameSections = todo.name.split(',')
+      const expression = nameSections[0]
+      const xMin = parseFloat(nameSections[1])
+      const xMax = parseFloat(nameSections[2])
+
+      logger.info(expression, xMin, xMax)
+      
+
+      
+
+      // Generating line graph
+      // const graph = generateGraph(expression, xMin, xMax)
+
+      generateGraph(expression, xMin, xMax)
+
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
       const result = await doc
@@ -42,6 +72,8 @@ export const TodosAccess = {
         .promise()
       return result.Attributes as TodoItem
     },
+
+    
   
     async updateTodo(
       userId: string,
@@ -85,4 +117,49 @@ export const TodosAccess = {
         .promise()
       return todoId as string
     }
+  };
+
+  
+const generateGraph = async (expression: string, xMin: number, xMax: number) => {
+
+  const xValues = [];
+  const yValues = [];
+  const step = (xMax - xMin) / 100;
+  for (let i = 0; i < 100; i++) {
+      const x = xMin + i * step;
+      const y = eval(expression.replace(/x/g, x.toString()));
+      xValues.push(x);
+      yValues.push(y);
   }
+
+  const chart = new QuickChart();
+  chart.setConfig({
+      type: 'line',
+      data: {
+          labels: xValues,
+          datasets: [
+              {
+                  label: expression,
+                  data: yValues,
+                  fill: false,
+                  borderColor: 'rgb(75, 192, 192)',
+                  tension: 0.1
+              }
+          ]
+      }
+  });
+
+  const url = await chart.getShortUrl();
+  const response = await fetch(url);
+  const buffer = await response.buffer();
+
+  const params = {
+      Bucket: process.env.ATTACHMENT_S3_BUCKET,
+      Key: `${expression}.png`,
+      Body: buffer,
+      ContentType: 'image/png'
+  };
+
+  await s3.putObject(params).promise();
+
+};
