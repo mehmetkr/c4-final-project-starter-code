@@ -7,13 +7,6 @@ import { TodoUpdate } from '../models/TodoUpdate';
 import QuickChart from 'quickchart-js';
 import fetch from 'node-fetch';
 
-
-// import { v4 as uuid } from 'uuid';
-
-// import * as fs from 'fs';
-
-// const XAWS = AWSXRay.captureAWS(AWS)
-
 const logger = createLogger('TodosAccess')
 
 
@@ -60,7 +53,11 @@ export const TodosAccess = {
       // Generating line graph
       // const graph = generateGraph(expression, xMin, xMax)
 
-      generateGraph(expression, xMin, xMax)
+      const imageBuffer = await generateGraph(expression, xMin, xMax)
+
+      const fiName = 'graph' + todo.todoId.substring(0,4)
+
+      saveGraphAsPng(imageBuffer, fiName)
 
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
@@ -120,44 +117,45 @@ export const TodosAccess = {
   };
 
   
-const generateGraph = async (expression: string, xMin: number, xMax: number) => {
+const generateGraph = async (expression: string, xMin: number, xMax: number) : Promise<Buffer> => {
 
-  const xValues = [];
-  const yValues = [];
+  let config = `{
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          data: [`
+
   const step = (xMax - xMin) / 100;
   for (let i = 0; i < 100; i++) {
       const x = xMin + i * step;
       const y = eval(expression.replace(/x/g, x.toString()));
-      xValues.push(x);
-      yValues.push(y);
+      config += '{ x: ' + x + ', y: ' + y + '}, '
   }
 
+  config += "], fill: false, borderColor: 'blue', pointRadius: 0,}, ], }, options: { legend: { display: false, }, scales: { xAxes: [ { type: 'linear', scaleLabel: { display: true, labelString: 'x', fontSize: 16, }, ticks: { fontSize: 12, }, }, ], yAxes: [ { scaleLabel: { display: true, labelString: 'f(x)', fontSize: 16, }, ticks: { fontSize: 12, }, }, ], }, }, width: 1500, height: 1000,}"
+
+  logger.info(config)
+
   const chart = new QuickChart();
-  chart.setConfig({
-      type: 'line',
-      data: {
-          labels: xValues,
-          datasets: [
-              {
-                  label: expression,
-                  data: yValues,
-                  fill: false,
-                  borderColor: 'rgb(75, 192, 192)',
-                  tension: 0.1
-              }
-          ]
-      }
-  });
+
+  chart.setConfig(config);
 
   const url = await chart.getShortUrl();
   const response = await fetch(url);
   const buffer = await response.buffer();
 
+  return buffer
+
+};
+
+const saveGraphAsPng = async (iBuffer: Buffer, fileName: String) => {
+
   const params = {
-      Bucket: process.env.ATTACHMENT_S3_BUCKET,
-      Key: `${expression}.png`,
-      Body: buffer,
-      ContentType: 'image/png'
+    Bucket: process.env.ATTACHMENT_S3_BUCKET,
+    Key: `${fileName}.png`,
+    Body: iBuffer,
+    ContentType: 'image/png'
   };
 
   await s3.putObject(params).promise();
