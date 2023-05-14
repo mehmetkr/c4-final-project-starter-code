@@ -4,9 +4,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 import { getUserId } from '../utils';
-import { getTodosForUser as getTodosForUser } from '../../businessLogic/functions'
-import { TodoItem } from '../../models/TodoItem'
-import { createLogger } from '../..//utils/logger'
+import { getFunctionsForUser as getFunctionsForUser } from '../../businessLogic/functions'
+import { FunctionItem } from '../../models/TodoItem'
+import { createLogger } from '../../utils/logger'
 
 
 // TODO: Get all TODO items for a current user
@@ -18,7 +18,7 @@ export const handler = middy(
       logger.info('Testing uId: ')
       let uId = getUserId(event)
       logger.info('User ID: ', {uId})
-      const todos = (await getTodosForUser(uId)) as TodoItem[]
+      const todos = (await getFunctionsForUser(uId)) as FunctionItem[]
       return todos
         ? {
             statusCode: 200,

@@ -177,15 +177,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               <Grid.Column width={1} floated="right">
                 <Button
                   icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(todo.todoId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
                   color="red"
                   onClick={() => this.onTodoDelete(todo.todoId)}
                 >

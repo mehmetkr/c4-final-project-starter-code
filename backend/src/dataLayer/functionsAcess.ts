@@ -2,24 +2,17 @@ import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
-import { TodoItem } from '../models/TodoItem'
+import { FunctionItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
-import QuickChart from 'quickchart-js';
-import fetch from 'node-fetch';
+import {GraphFunctions} from '../dataLayer/graphFunctions'
 
 const logger = createLogger('FunctionsAccess')
-
-
-const s3 = new AWS.S3({
-  signatureVersion: 'v4'
-});
-
 
 // Functions: Implement the dataLayer logic
 
 
 export const FunctionsAccess = {
-    async getFunctions(userId: string): Promise<TodoItem[]> {
+    async getFunctions(userId: string): Promise<FunctionItem[]> {
       logger.info('Getting all functions for user', { userId })
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
@@ -34,10 +27,10 @@ export const FunctionsAccess = {
         })
         .promise()
       const items = result.Items
-      return items as TodoItem[]
+      return items as FunctionItem[]
     },
   
-    async createFunction(todo: TodoItem): Promise<TodoItem> {
+    async createFunction(todo: FunctionItem): Promise<FunctionItem> {
 
       // Splitting todo name into three sections
       const nameSections = todo.name.split(',')
@@ -47,11 +40,11 @@ export const FunctionsAccess = {
 
       logger.info(expression, xMin, xMax)
 
-      const imageBuffer = await generateGraph(expression, xMin, xMax)
+      const imageBuffer = await GraphFunctions.generateGraph(expression, xMin, xMax)
 
       const fiName = 'graph' + todo.todoId.substring(0,4)
 
-      saveGraphAsPng(imageBuffer, fiName)
+      GraphFunctions.saveGraphAsPng(imageBuffer, fiName)
 
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
@@ -61,14 +54,14 @@ export const FunctionsAccess = {
           Item: todo
         })
         .promise()
-      return result.Attributes as TodoItem
+      return result.Attributes as FunctionItem
     },
   
     async updateFunction(
       userId: string,
       todoId: string,
       todoUpdate: TodoUpdate
-    ): Promise<TodoItem> {
+    ): Promise<FunctionItem> {
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       // AWSXRay.captureAWSClient((doc as any).service)
       const result = await doc
@@ -89,7 +82,7 @@ export const FunctionsAccess = {
           }
         })
         .promise()
-      return result.Attributes as TodoItem
+      return result.Attributes as FunctionItem
     },
   
     async deleteFunction(userId: string, todoId: string): Promise<string> {
@@ -107,49 +100,3 @@ export const FunctionsAccess = {
       return todoId as string
     }
   };
-
-  
-const generateGraph = async (expression: string, xMin: number, xMax: number) : Promise<Buffer> => {
-
-  let config = `{
-    type: 'line',
-    data: {
-      datasets: [
-        {
-          data: [`
-
-  const step = (xMax - xMin) / 100;
-  for (let i = 0; i < 100; i++) {
-      const x = xMin + i * step;
-      const y = eval(expression.replace(/x/g, x.toString()));
-      config += '{ x: ' + x + ', y: ' + y + '}, '
-  }
-
-  config += "], fill: false, borderColor: 'blue', pointRadius: 0,}, ], }, options: { legend: { display: false, }, scales: { xAxes: [ { type: 'linear', scaleLabel: { display: true, labelString: 'x', fontSize: 16, }, ticks: { fontSize: 12, }, }, ], yAxes: [ { scaleLabel: { display: true, labelString: 'f(x)', fontSize: 16, }, ticks: { fontSize: 12, }, }, ], }, }, width: 1500, height: 1000,}"
-
-  logger.info(config)
-
-  const chart = new QuickChart();
-
-  chart.setConfig(config);
-
-  const url = await chart.getShortUrl();
-  const response = await fetch(url);
-  const buffer = await response.buffer();
-
-  return buffer
-
-};
-
-const saveGraphAsPng = async (iBuffer: Buffer, fileName: String) => {
-
-  const params = {
-    Bucket: process.env.ATTACHMENT_S3_BUCKET,
-    Key: `${fileName}.png`,
-    Body: iBuffer,
-    ContentType: 'image/png'
-  };
-
-  await s3.putObject(params).promise();
-
-};
