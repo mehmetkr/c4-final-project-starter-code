@@ -1,4 +1,4 @@
-import { TodosAccess } from '../dataLayer/todosAcess'
+import { FunctionsAccess } from '../dataLayer/functionsAcess'
 import { AttachmentUtils } from '../helpers/attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
@@ -12,7 +12,7 @@ import * as createError from 'http-errors'
 export const getTodosForUser = async (userId: string) => {
     const logger = createLogger('GetTodos')
     try {
-      let todos = await TodosAccess.getTodos(userId)
+      let todos = await FunctionsAccess.getFunctions(userId)
       logger.info('Getting functions for user ' + userId)
       return todos
     } catch (e) {
@@ -37,7 +37,7 @@ export const getTodosForUser = async (userId: string) => {
   
     const todoId = uuid.v4()
     const createdAt = new Date().toISOString()
-    // const attachmentUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`
+    const attachmentUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/` + 'graph' + todoId.substring(0,4) + '.png'
   
     logger.info('Constructing the function Item')
     const todo: TodoItem = {
@@ -47,9 +47,9 @@ export const getTodosForUser = async (userId: string) => {
       name: newTodo.name,
       dueDate: newTodo.dueDate,
       done: false,
-      // attachmentUrl
+      attachmentUrl
     }
-    await TodosAccess.createTodo(todo)
+    await FunctionsAccess.createFunction(todo)
     logger.info('Created function', { todo })
 
     return todo as TodoItem
@@ -57,8 +57,8 @@ export const getTodosForUser = async (userId: string) => {
   
   export const deleteTodo = async (userId: string, todoId: string) => {
     const logger = createLogger('DeleteTodo')
-    const result = await TodosAccess.deleteTodo(userId, todoId)
-    // if (result) AttachmentUtils.deleteAttachment(todoId)
+    const result = await FunctionsAccess.deleteFunction(userId, todoId)
+    if (result) AttachmentUtils.deleteAttachment(todoId)
     logger.info('Deleted function', { todoId })
     return result
   }
@@ -69,7 +69,7 @@ export const getTodosForUser = async (userId: string) => {
     updatedTodo: UpdateTodoRequest
   ) => {
     const logger = createLogger('UpdateTodo')
-    const todo = await TodosAccess.updateTodo(userId, todoId, updatedTodo)
+    const todo = await FunctionsAccess.updateFunction(userId, todoId, updatedTodo)
     logger.info('Updated function', { todo })
     return todo
   }

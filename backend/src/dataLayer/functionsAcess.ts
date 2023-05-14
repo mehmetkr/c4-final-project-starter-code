@@ -7,7 +7,7 @@ import { TodoUpdate } from '../models/TodoUpdate';
 import QuickChart from 'quickchart-js';
 import fetch from 'node-fetch';
 
-const logger = createLogger('TodosAccess')
+const logger = createLogger('FunctionsAccess')
 
 
 const s3 = new AWS.S3({
@@ -15,12 +15,12 @@ const s3 = new AWS.S3({
 });
 
 
-// TODO: Implement the dataLayer logic
+// Functions: Implement the dataLayer logic
 
 
-export const TodosAccess = {
-    async getTodos(userId: string): Promise<TodoItem[]> {
-      logger.info('Getting all todos for user', { userId })
+export const FunctionsAccess = {
+    async getFunctions(userId: string): Promise<TodoItem[]> {
+      logger.info('Getting all functions for user', { userId })
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
       const result = await doc
@@ -37,7 +37,7 @@ export const TodosAccess = {
       return items as TodoItem[]
     },
   
-    async createTodo(todo: TodoItem): Promise<TodoItem> {
+    async createFunction(todo: TodoItem): Promise<TodoItem> {
 
       // Splitting todo name into three sections
       const nameSections = todo.name.split(',')
@@ -46,12 +46,6 @@ export const TodosAccess = {
       const xMax = parseFloat(nameSections[2])
 
       logger.info(expression, xMin, xMax)
-      
-
-      
-
-      // Generating line graph
-      // const graph = generateGraph(expression, xMin, xMax)
 
       const imageBuffer = await generateGraph(expression, xMin, xMax)
 
@@ -69,10 +63,8 @@ export const TodosAccess = {
         .promise()
       return result.Attributes as TodoItem
     },
-
-    
   
-    async updateTodo(
+    async updateFunction(
       userId: string,
       todoId: string,
       todoUpdate: TodoUpdate
@@ -100,15 +92,15 @@ export const TodosAccess = {
       return result.Attributes as TodoItem
     },
   
-    async deleteTodo(userId: string, todoId: string): Promise<string> {
+    async deleteFunction(userId: string, todoId: string): Promise<string> {
       let doc = new DocumentClient({ service: new AWS.DynamoDB() })
       AWSXRay.captureAWSClient((doc as any).service)
       await doc
         .delete({
           TableName: process.env.TODOS_TABLE,
           Key: {
-            userId,
-            todoId
+            "userId": userId,
+            "todoId": todoId
           }
         })
         .promise()

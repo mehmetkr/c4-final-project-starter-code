@@ -67,7 +67,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: this.state.todos.filter(todo => todo.todoId !== todoId)
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Todo deletion failed1')
     }
   }
 
@@ -85,7 +85,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Todo deletion failed2')
     }
   }
 
@@ -97,14 +97,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         loadingTodos: false
       })
     } catch (e) {
-      alert(`Failed to fetch todos: ${(e as Error).message}`)
+      alert(`Failed to fetch functions: ${(e as Error).message}`)
     }
   }
 
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">Functions</Header>
 
         {this.renderCreateTodoInput()}
 
@@ -122,12 +122,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New task',
+              content: 'Enter a new function in terms of x',
               onClick: this.onTodoCreate
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="E.g. 2*x-5, 2*x*x - 5*x, etc."
             onChange={this.handleNameChange}
           />
         </Grid.Column>
@@ -150,7 +150,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Functions
         </Loader>
       </Grid.Row>
     )

@@ -143,13 +143,13 @@ functions:
         Action:
           - dynamodb:DeleteItem
           - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: '*'
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
           - xray:PutTelemetryRecords
         Resource:
-          - '*'          
+          - '*'
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
